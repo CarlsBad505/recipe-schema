@@ -12,28 +12,36 @@ Basically, we string together a conditional `where` clause based on the criteria
 ```
 Recipe.left_outer_joins(:favorites).where.not(favorites: {user_id: nil}).distinct
 ```
+
 We `left_outer_joins` the favorites table because we don't need to return the association and it speeds up the query vs a pure `joins`. Its difference is nearly half the time. We then add a `where` clause and call `distinct` on it to return only recipes that have been favorited by at least 1 person. The association can still be called later with the result.
+
 ---
 
 **All recipes that have not been favorited by any users**
 ```
 Recipe.left_outer_joins(:favorites).where(favorites: {recipe_id: nil})
 ```
+
 We `left_outer_joins` the favorites table because we don't need to return the association and it speeds up the query vs a pure `joins`. Its difference is nearly half the time. We then add a `where` clause to return all recipes that don't have a joins in the favorites table.
+
 ---
 
 **All recipes that have a food with the name "avocado" or "broccoli" as an ingredient**
 ```
 Recipe.left_outer_joins(:foods).where("foods.name = ? or foods.name = ?", "avocado", "broccoli")
 ```
+
 We `left_outer_joins` the favorites table because we don't need to return the association and it speeds up the query vs a pure `joins`. Its difference is nearly half the time. We then add a `where` conditional clause.
+
 ---
 
 **The names and IDs of all foods that are either ingredients of the recipe with ID 42 or ingredients of its child recipes. If a food is an ingredient of both the recipe and one or more of its child recipes, its name and ID should only appear once**
 ```
 Recipe.joins("LEFT OUTER JOIN recipe_descendants ON recipes.id = recipe_descendants.child_id OR recipes.id = 42 WHERE recipe_descendants.parent_id = 42").left_outer_joins(:foods).select('foods.id', 'foods.name').distinct
 ```
+
 This one was pretty complicated, we're joining across 3 tables, 5 if you consider the join tables themselves. Here we find recipes that either have an id = 42 or child recipes that have a parent id = 42. Then we list out the food ids and names making sure to return only distinct values.
+
 ---
 
 **Optional Challenge: The names and IDs of all foods that are either ingredients of the recipe with ID 42 or ingredients of its descendant recipes (i.e. of this recipe's child recipes, and their child recipes, and their child recipes, ..., etc.). Similarly, foods should only appear once.**
@@ -56,7 +64,9 @@ def recursive_child_recipes(recipe)
   end
 end
 ```
+
 Because we don't really know how many nested child recipes there could be, it doesn't quite make sense to do a single SQL query for this one. We need to do something a little more sophisticated, some recursion in a loop until all nested outcomes have been discovered. After doing this, we can return a unique array of ingredients / foods.
+
 ---
 
 ## Description
