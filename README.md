@@ -5,7 +5,9 @@
 ```
 Food.where("fat < ? and name like ?", "10", "%pizza%")
 ```
+
 Basically, we string together a conditional `where` clause based on the criteria.
+
 ---
 
 **All recipes that have been favorited by at least 1 user.**
